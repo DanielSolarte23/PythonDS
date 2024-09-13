@@ -77,4 +77,6 @@ def listaProductosName():
     except miConexion.Error as error:
         print(str(error))
 
-listaProductosName()
+# listaProductosName()
+
+#  

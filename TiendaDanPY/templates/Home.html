@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CRUD Productos con Modales</title>
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+      <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">
+        Gestión de Productos
+      </h1>
+
+      <!-- Botón para consultar todos los productos -->
+      <div class="mb-6 text-center">
+        <button id="consultProductsButton" class="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700">
+          Consultar Todos los Productos
+        </button>
+      </div>
+
+      <!-- Tabla para mostrar los productos -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-100 border-b">
+            <tr>
+              <th class="text-left p-3 text-sm font-semibold text-gray-700">Código</th>
+              <th class="text-left p-3 text-sm font-semibold text-gray-700">Nombre</th>
+              <th class="text-left p-3 text-sm font-semibold text-gray-700">Precio</th>
+              <th class="text-left p-3 text-sm font-semibold text-gray-700">Categoría</th>
+              <th class="text-left p-3 text-sm font-semibold text-gray-700">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody" class="divide-y divide-gray-200">
+            <!-- Aquí se llenará la tabla con productos desde la API -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modales -->
+      <!-- Modal para Eliminar -->
+      <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm">
+          <h3 class="text-lg font-semibold mb-4">Eliminar Producto</h3>
+          <p>¿Estás seguro de que deseas eliminar este producto?</p>
+          <div class="mt-4 flex justify-end space-x-2">
+            <button id="confirmDeleteButton" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Eliminar</button>
+            <button id="cancelDeleteButton" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal para Actualizar -->
+      <div id="updateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md">
+          <h3 class="text-lg font-semibold mb-4">Actualizar Producto</h3>
+          <form id="updateProductForm" class="space-y-4">
+            <div>
+              <label for="nuevoPrecio" class="block text-sm font-medium text-gray-700">Nuevo Precio</label>
+              <input type="number" id="nuevoPrecio" name="nuevoPrecio" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
+            </div>
+            <div class="flex justify-end space-x-2">
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Actualizar</button>
+              <button type="button" id="cancelUpdateButton" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal para Agregar -->
+      <div id="addModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md">
+          <h3 class="text-lg font-semibold mb-4">Agregar Nuevo Producto</h3>
+          <form id="addProductFormModal" class="space-y-4">
+            <div>
+              <label for="codigo" class="block text-sm font-medium text-gray-700">Código</label>
+              <input type="number" id="codigoModal" name="codigo" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
+            </div>
+            <div>
+              <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+              <input type="text" id="nombreModal" name="nombre" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
+            </div>
+            <div>
+              <label for="precio" class="block text-sm font-medium text-gray-700">Precio</label>
+              <input type="number" id="precioModal" name="precio" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
+            </div>
+            <div>
+              <label for="categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
+              <input type="text" id="categoriaModal" name="categoria" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
+            </div>
+            <div class="flex justify-end space-x-2">
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Agregar</button>
+              <button type="button" id="cancelAddButton" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Simulación de una lista de productos desde la API
+      //const productos = [
+        //{ codigo: 1, nombre: "Producto A", precio: 100, categoria: "Categoría 1" },
+        //{ codigo: 2, nombre: "Producto B", precio: 200, categoria: "Categoría 2" },
+        //{ codigo: 3, nombre: "Producto C", precio: 300, categoria: "Categoría 3" },
+      //];
+
+      // Función para mostrar los productos en la tabla
+      const mostrarProductos = () => {
+        const tbody = document.getElementById("productsTableBody");
+        tbody.innerHTML = ""; // Limpiar tabla
+        productos.forEach((producto) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="p-3">${producto.codigo}</td>
+            <td class="p-3">${producto.nombre}</td>
+            <td class="p-3">$${producto.precio}</td>
+            <td class="p-3">${producto.categoria}</td>
+            <td class="p-3">
+              <button class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 mr-2" onclick="openDeleteModal(${producto.codigo})">Eliminar</button>
+              <button class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 mr-2" onclick="openUpdateModal(${producto.codigo})">Actualizar</button>
+              <button class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700" onclick="openAddModal()">Agregar</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      };
+
+      // Eventos para abrir y cerrar modales
+      const openDeleteModal = (codigo) => {
+        document.getElementById("deleteModal").classList.remove("hidden");
+        // Código para eliminar el producto con el código especificado
+      };
+
+      const openUpdateModal = (codigo) => {
+        document.getElementById("updateModal").classList.remove("hidden");
+        // Código para actualizar el producto con el código especificado
+      };
+
+      const openAddModal = () => {
+        document.getElementById("addModal").classList.remove("hidden");
+      };
+
+      // Cerrar modales
+      document.getElementById("cancelDeleteButton").addEventListener("click", () => {
+        document.getElementById("deleteModal").classList.add("hidden");
+      });
+
+      document.getElementById("cancelUpdateButton").addEventListener("click", () => {
+        document.getElementById("updateModal").classList.add("hidden");
+      });
+
+      document.getElementById("cancelAddButton").addEventListener("click", () => {
+        document.getElementById("addModal").classList.add("hidden");
+      });
+
+      // Mostrar productos al hacer clic en "Consultar Todos los Productos"
+      document.getElementById("consultProductsButton").addEventListener("click", mostrarProductos);
+    </script>
+  </body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <title>Tienda</title>
+  </head>
+  <body class="bg-gray-100">
+  
+    
+        
+    </div>
+  </body>
+</html> -->
